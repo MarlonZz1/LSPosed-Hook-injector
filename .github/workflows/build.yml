@@ -9,16 +9,17 @@ jobs:
         uses: actions/setup-java@v4
         with: { java-version: '17', distribution: 'temurin' }
       
-      # 手动授予 gradlew 执行权限，防止权限丢失
-      - name: Fix Permissions
-        run: chmod +x gradlew || true
+      # 暴力安装 Gradle，不使用本地的 gradlew
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+      
+      # 强行运行编译命令
+      - name: Execute Build
+        run: gradle assembleRelease --stacktrace
 
-      # 使用直接编译，跳过缓存以规避 1000041397.jpg 中的服务器错误
-      - name: Build with Gradle
-        run: ./gradlew assembleRelease --stacktrace || gradle assembleRelease --stacktrace
-
+      # 查找生成的 APK 并上传
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with: 
           name: StealthModule
-          path: "app/build/outputs/apk/release/*.apk"
+          path: "**/build/outputs/apk/release/*.apk"
