@@ -8,12 +8,20 @@ jobs:
       - name: set up JDK 17
         uses: actions/setup-java@v4
         with: { java-version: '17', distribution: 'temurin' }
-      - name: Make Gradle Wrapper Executable
-        run: chmod +x gradlew
+      
+      # 即使没有 gradlew，我们也强行安装一个 gradle 来编译
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+      
       - name: Build with Gradle
-        run: ./gradlew assembleRelease --stacktrace
+        run: gradle assembleRelease --stacktrace
+
+      # 打印一下所有生成的文件路径，方便找 APK
+      - name: List Files
+        run: find . -name "*.apk"
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with: 
           name: StealthModule
-          path: app/build/outputs/apk/release/*.apk
+          path: "**/build/outputs/apk/release/*.apk"
