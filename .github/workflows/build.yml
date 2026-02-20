@@ -9,15 +9,16 @@ jobs:
         uses: actions/setup-java@v4
         with: { java-version: '17', distribution: 'temurin' }
       
-      # 暴力安装 Gradle，不使用本地的 gradlew
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-      
-      # 强行运行编译命令
-      - name: Execute Build
-        run: gradle assembleRelease --stacktrace
+      # 绕过 GitHub 缓存，直接安装构建工具
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
-      # 查找生成的 APK 并上传
+      # 暴力运行：如果 gradlew 坏了，直接用系统 gradle 编
+      - name: Build with Gradle
+        run: |
+          chmod +x gradlew || true
+          ./gradlew assembleRelease --stacktrace || gradle assembleRelease --stacktrace
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with: 
