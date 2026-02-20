@@ -5,21 +5,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
       - name: set up JDK 17
         uses: actions/setup-java@v4
-        with: { java-version: '17', distribution: 'temurin' }
+        with: 
+          java-version: '17'
+          distribution: 'temurin'
+          # 绝对不使用任何缓存配置
       
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-
-      - name: Build with Gradle
-        run: gradle assembleRelease --stacktrace
-
-      - name: Show Built Files
-        run: find . -name "*.apk"
-
+      # 完全抛弃 GitHub 抽风的插件，直接从官网拉取纯净版 Gradle 暴力编译
+      - name: Force Build (Bypass GitHub Servers)
+        run: |
+          wget https://services.gradle.org/distributions/gradle-8.1.1-bin.zip
+          unzip -q gradle-8.1.1-bin.zip
+          export PATH=$PWD/gradle-8.1.1/bin:$PATH
+          gradle assembleRelease --stacktrace
+          
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with: 
           name: StealthModule
-          path: "**/*.apk" # 暴力搜索所有生成的 APK
+          path: "**/*.apk"
