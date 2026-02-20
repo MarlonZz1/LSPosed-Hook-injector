@@ -11,7 +11,13 @@ android {
         versionName "1.0"
         externalNativeBuild { cmake { cppFlags "" } }
     }
-    buildTypes { release { minifyEnabled false } }
+    // 强制允许 release 版不签名也能编译成功
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.debug 
+        }
+    }
     externalNativeBuild { cmake { path "src/main/cpp/CMakeLists.txt" } }
 }
 
