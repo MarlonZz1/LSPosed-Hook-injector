@@ -9,19 +9,16 @@ jobs:
         uses: actions/setup-java@v4
         with: { java-version: '17', distribution: 'temurin' }
       
-      # 即使没有 gradlew，我们也强行安装一个 gradle 来编译
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
-      
-      - name: Build with Gradle
-        run: gradle assembleRelease --stacktrace
+      # 手动授予 gradlew 执行权限，防止权限丢失
+      - name: Fix Permissions
+        run: chmod +x gradlew || true
 
-      # 打印一下所有生成的文件路径，方便找 APK
-      - name: List Files
-        run: find . -name "*.apk"
+      # 使用直接编译，跳过缓存以规避 1000041397.jpg 中的服务器错误
+      - name: Build with Gradle
+        run: ./gradlew assembleRelease --stacktrace || gradle assembleRelease --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with: 
           name: StealthModule
-          path: "**/build/outputs/apk/release/*.apk"
+          path: "app/build/outputs/apk/release/*.apk"
